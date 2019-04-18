@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/vue"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.js"></script>
+
+
+    <title></title>
+  </head>
+  <body>
+    <div id="vue-app">
+      Site <input type="text" v-model="site" @keyup.enter="chargeSite"><span v-if="working">...</span>
+
+      <div v-if="modulateurs.length > 0">
+        <div class="">
+          Composition du site
+
+        <ol>
+          <li v-for="modulateur in modulateurs">id modulateur : {{modulateur.id}}
+            <ul>
+              <li v-for="voie in modulateur.voies">
+                <button v-if="!voie.effacement_en_cours" type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Démarrer eff.</button>
+                <button v-else type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Arrêter eff.</button>
+                id voie : {{voie.id}}, équipement : {{voie.equipements.toString()}}
+              </li>
+            </ul>
+
+          </li>
+        </ol>
+        </div>
+
+        <div class="">
+          Consommation du site
+
+          <div> Taux de couverture : {{taux_couverture}} %</div>
+          <div> Taux d'autoproduction : {{taux_autoproduction}} %</div>
+
+
+  <div id="div_graphique">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <div> <button type="button" @click="trace_periode_precedente"> &lt;- Précédent</button><button type="button" @click="trace_periode_suivante">Suivant -&gt; </button></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+<script src="app.js"></script>
+  </body>
+</html>
