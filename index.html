@@ -12,20 +12,20 @@
   </head>
   <body>
     <div id="vue-app">
-      Site <input type="text" v-model="site" @keyup.enter="chargeSite"><span v-if="working">...</span>
+      Site <input type="text" v-model='$site' @keyup.enter="chargeSite"><span v-if="working">...</span>
 
-      <div v-if="modulateurs.length > 0">
+      <div v-show="$modulateurs.length > 0">
         <div class="">
           Composition du site
 
         <ol>
-          <li v-for="modulateur in modulateurs">id modulateur : {{modulateur.id}}
+          <li v-for="modulateur in $modulateurs">id modulateur : {{modulateur.id}}
             <ul>
-              <li v-for="voie in modulateur.voies">
-                <button v-if="!voie.effacement_en_cours" type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Démarrer eff.</button>
-                <button v-else type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Arrêter eff.</button>
-                id voie : {{voie.id}}, équipement : {{voie.equipements.toString()}}
-              </li>
+              <voie_component
+                v-for="voie in modulateur.voies"
+                v-bind:voie='voie'
+                v-bind:key='voie.id'
+              ></voie_component>
             </ul>
 
           </li>

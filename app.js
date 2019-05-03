@@ -8,11 +8,13 @@ var enumerateMomentsBetweenDates = function(startDate, endDate, by_int, by_unit)
     return dates;
 };
 
+Vue.prototype.$site = '';
+Vue.prototype.$modulateurs = [];
+
+
 new Vue({
   el:"#vue-app",
   data: {
-    site:'103959',
-    modulateurs:[],
     working: false,
     taux_couverture: 0,
     taux_autoproduction:0,
@@ -23,13 +25,12 @@ new Vue({
     chargeSite: function(){
       var app = this
       app.working = true;
-      console.log("Chargement de la conf du site " + this.site)
-      app.BDD_recupere_modulateurs_site(this.site, function(){
+      console.log("Chargement de la conf du site " + app.$site)
+      app.BDD_recupere_modulateurs_site(function(){
         app.periode_tracee.date_fin = moment().startOf('day')
         app.periode_tracee.date_debut = app.periode_tracee.date_fin.clone().subtract(app.duree_periode_en_jour, 'days')
 
-        app.charge_graphique({site: this.site,
-                              periode: app.periode_tracee}, function(){
+        app.charge_graphique({periode: app.periode_tracee}, function(){
                                 app.working = false
                               })
       })
@@ -54,8 +55,7 @@ new Vue({
       app.working = true
       app.periode_tracee.date_debut = app.periode_tracee.date_fin
       app.periode_tracee.date_fin = app.periode_tracee.date_debut.clone().add(app.duree_periode_en_jour, 'days')
-      app.charge_graphique({site: app.site,
-                            periode: app.periode_tracee}, function(){
+      app.charge_graphique({periode: app.periode_tracee}, function(){
                               app.working = false
                             })
     },
@@ -64,8 +64,7 @@ new Vue({
       app.working = true
       app.periode_tracee.date_fin = app.periode_tracee.date_debut
       app.periode_tracee.date_debut = app.periode_tracee.date_fin.clone().subtract(app.duree_periode_en_jour, 'days')
-      app.charge_graphique({site: app.site,
-                            periode: app.periode_tracee}, function(){
+      app.charge_graphique({periode: app.periode_tracee}, function(){
                               app.working = false
                             })
     },
@@ -111,8 +110,7 @@ new Vue({
       });
     },
     BDD_conso_site: function(data, cb){
-      // Structure de data :  {site,
-      //                       periode: {date_debut, date_fin}}
+      // Structure de data :  {periode: {date_debut, date_fin}}
       setTimeout(function(){
         let dates = enumerateMomentsBetweenDates(data.periode.date_debut, data.periode.date_fin, by_int = 30, by_unit = 'minutes')
         let conso = [], prod = []
@@ -127,10 +125,10 @@ new Vue({
       }, Math.floor(Math.random() * 2000) + 1)
 
     },
-    BDD_recupere_modulateurs_site: function(site, cb){
+    BDD_recupere_modulateurs_site: function(cb){
       var app = this
       setTimeout(function(){
-        app.modulateurs = [
+        app.$modulateurs = [
           {id: app.genere_id(), voies:[{id:app.genere_id(), equipements: ['PV'], effacement_en_cours: false}]},
           {id: app.genere_id(), voies:[{id:app.genere_id(), equipements: ['ECS'], effacement_en_cours: false},
                               {id:app.genere_id(), equipements: ['Radiateur'], effacement_en_cours: false}]}]
@@ -139,16 +137,31 @@ new Vue({
     },
     genere_id: function(){
       return Math.floor(Math.random() * 1000000) + 1
-    },
-    BDD_toggle_effacement_voie: function(id_modulateur, id_voie){
-      var app = this
-      setTimeout(function(){
-        let m = app.modulateurs.find(m => { return m.id == id_modulateur })
-        let v = m.voies.find(v => v.id == id_voie)
-        v.effacement_en_cours = !v.effacement_en_cours
-      }, Math.floor(Math.random() * 2000) + 1)
-    },
+    }
   },
   computed:{
   }
 });
+
+
+
+Vue.component('voie_component', {
+  props:['voie'],
+  template: `
+  <li>
+    <button v-if="!voie.effacement_en_cours" type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Démarrer eff.</button>
+    <button v-else type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Arrêter eff.</button>
+    id voie : {{voie.id}}, équipement : {{voie.equipements.toString()}}
+  </li>
+  `,
+  methods: {
+    BDD_toggle_effacement_voie: function(id_modulateur, id_voie){
+        var app = this
+        setTimeout(function(){
+          let m = app.$modulateurs.find(m => { return m.id == id_modulateur })
+          let v = m.voies.find(v => v.id == id_voie)
+          v.effacement_en_cours = !v.effacement_en_cours
+        }, Math.floor(Math.random() * 2000) + 1)
+      }
+    }
+})
