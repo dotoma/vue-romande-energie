@@ -8,11 +8,21 @@ var enumerateMomentsBetweenDates = function(startDate, endDate, by_int, by_unit)
     return dates;
 };
 
-Vue.prototype.$site = '';
-Vue.prototype.$modulateurs = [];
+const store = new Vuex.Store({
+  state: {
+    $site: '',
+    $modulateurs: ''
+  },
+  mutations: {
+    UPDATE_SITE: function(state, newSite) { state.$site = newSite },
+    UPDATE_MODULATEURS: function(state, newModulateurs) { state.$modulateurs = newModulateurs },
+  }
+});
+
 
 
 new Vue({
+  store,
   el:"#vue-app",
   data: {
     working: false,
@@ -20,6 +30,14 @@ new Vue({
     taux_autoproduction:0,
     duree_periode_en_jour: 1,
     periode_tracee: {date_debut: '', date_fin: ''}
+  },
+  computed:{
+    $site: {
+      get(){return this.$store.state.$site},
+      set(newSite){ return this.$store.commit('UPDATE_SITE', newSite)}},
+    $modulateurs: {
+      get(){return this.$store.state.$modulateurs},
+      set(newModulateurs){ return this.$store.commit('UPDATE_MODULATEURS', newModulateurs)}}
   },
   methods:{
     chargeSite: function(){
@@ -128,9 +146,8 @@ new Vue({
     BDD_recupere_modulateurs_site: function(cb){
       var app = this
       setTimeout(function(){
-        app.$modulateurs = [
-          {id: app.genere_id(), voies:[{id:app.genere_id(), equipements: ['PV'], effacement_en_cours: false}]},
-          {id: app.genere_id(), voies:[{id:app.genere_id(), equipements: ['ECS'], effacement_en_cours: false},
+        app.$modulateurs = [{id: app.genere_id(), voies:[{id:app.genere_id(), equipements: ['PV'], effacement_en_cours: false}]},
+        {id: app.genere_id(), voies:[{id:app.genere_id(), equipements: ['ECS'], effacement_en_cours: false},
                               {id:app.genere_id(), equipements: ['Radiateur'], effacement_en_cours: false}]}]
         cb()
       }, Math.floor(Math.random() * 2000) + 1)
@@ -139,14 +156,13 @@ new Vue({
       return Math.floor(Math.random() * 1000000) + 1
     }
   },
-  computed:{
-  }
 });
 
 
 
 Vue.component('voie_component', {
-  props:['voie'],
+  store,
+  props:['voie', 'modulateur'],
   template: `
   <li>
     <button v-if="!voie.effacement_en_cours" type="button" @click="BDD_toggle_effacement_voie(modulateur.id, voie.id)">Démarrer eff.</button>
@@ -154,7 +170,15 @@ Vue.component('voie_component', {
     id voie : {{voie.id}}, équipement : {{voie.equipements.toString()}}
   </li>
   `,
-  methods: {
+  computed:{
+    $site: {
+      get(){return this.$store.state.$site},
+      set(newSite){ return this.$store.commit('UPDATE_SITE', newSite)}},
+    $modulateurs: {
+      get(){return this.$store.state.$modulateurs},
+      set(newModulateurs){ return this.$store.commit('UPDATE_MODULATEURS', newModulateurs)}}
+  },
+  methods:{
     BDD_toggle_effacement_voie: function(id_modulateur, id_voie){
         var app = this
         setTimeout(function(){

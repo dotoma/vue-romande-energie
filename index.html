@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/vue"> </script>
+    <script type="text/javascript" src="https://unpkg.com/vuex"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.js"></script>
 
@@ -12,7 +13,7 @@
   </head>
   <body>
     <div id="vue-app">
-      Site <input type="text" v-model='$site' @keyup.enter="chargeSite"><span v-if="working">...</span>
+      Site <input type="text" v-model="$site"  @keyup.enter="chargeSite"><span v-if="working">...</span>
 
       <div v-show="$modulateurs.length > 0">
         <div class="">
@@ -24,6 +25,7 @@
               <voie_component
                 v-for="voie in modulateur.voies"
                 v-bind:voie='voie'
+                v-bind:modulateur='modulateur'
                 v-bind:key='voie.id'
               ></voie_component>
             </ul>
